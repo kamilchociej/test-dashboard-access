@@ -1,4 +1,3 @@
----
 defaultRegistry: "ghcr.io/streamx-dev/streamx-blueprints"
 defaultImageTag: "1.0.7-jvm"
 ingestion:
