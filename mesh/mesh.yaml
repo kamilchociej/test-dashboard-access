@@ -86,4 +86,4 @@ delivery:
         topic: "outboxes/assets"
       web-resources:
         topic: "outboxes/web-resources"
-    port: 8081
+    port: 8082
