@@ -30,6 +30,9 @@ processing:
     environment:
       MP_MESSAGING_INCOMING_MESSAGES_SCHEMA: "web-resource-schema"
       MP_MESSAGING_OUTGOING_RELAYED-MESSAGES_SCHEMA: "web-resource-schema"
+    environmentFrom:
+      configs:
+        - "test.properties"
   blueprint-relay-assets:
     image: "relay-processing-service"
     incoming:
