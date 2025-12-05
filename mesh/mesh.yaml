@@ -33,6 +33,8 @@ processing:
     environmentFrom:
       configs:
         - "test.properties"
+      secrets:
+        - "secret.properties"        
   blueprint-relay-assets:
     image: "relay-processing-service"
     incoming:
