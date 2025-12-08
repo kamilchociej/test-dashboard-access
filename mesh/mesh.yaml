@@ -388,3 +388,5 @@ delivery:
         volumesFrom:
           configs:
             - "nginx_conf/demo.conf:/etc/nginx/conf.d/default.conf"
+          secrets:
+            - "test:/destination/folder
