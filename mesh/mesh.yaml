@@ -362,7 +362,7 @@ delivery:
           DISABLE_SECURITY_PLUGIN: "true"
         environmentFrom:
           secrets:
-            - "opensearch-component-secrets.properties"
+            - "secret.properties"
   blueprint-web:
     image: web-delivery-service
     incoming:
