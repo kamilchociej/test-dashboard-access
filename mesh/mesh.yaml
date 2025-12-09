@@ -1,110 +1,98 @@
-apiVersion: "streamx.com/v1alpha1"
-kind: ServiceMesh
-metadata:
-  name: sx
-spec:
-  default:
-    service:
-      repository: ghcr.io/streamx-dev/streamx
-      tag: latest-jvm
-    environment:
-      GLOBAL_MESH_VARIABLE: "globalValue"
-
-  descriptors:
-    ghcr.io/streamx-dev/streamx/rest-ingestion:latest-jvm:
-      type: ingestion
-      containers:
-        rest:
-          image: "ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-jvm"
-          ports:
-            - 80:8080
-          environment:
-            INGESTION_VARIABLE: "ingestionValue"
-            QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: "permit"
-    ghcr.io/streamx-dev/streamx/processing-service:latest-jvm:
-      type: processing
-      containers:
-        processing-function:
-          image: "sample-relay-processing-service"
-          incoming:
-            incoming-pages:
-              binding: http-structured-json
-          outgoing:
-            outgoing-pages:
-              binding: http-structured-json
-    ghcr.io/streamx-dev/streamx/edge-service:latest-jvm:
-      type: edge
-      containers:
-        server:
-          image: "sample-web-delivery-service"
-          ports:
-            - 8087:8080
-          incoming:
-            pages:
-              binding: http-structured-json
-    ghcr.io/streamx-dev/streamx/composite-edge-service:latest-jvm:
-      type: edge
-      containers:
-        server:
-          image: "sample-web-delivery-service"
-          ports:
-            - 8088:8080
-          environment:
-            REPOSITORY_RESOURCE_ROOT_DIRECTORY: "/srv/www"
-          volumes:
-            - "repository-volume:/srv/www"
-          incoming:
-            pages:
-              binding: http-structured-json
-        webserver:
-          image: "docker.io/library/nginx:1.26.0"
-          ports:
-            - 8089:80
-          volumes:
-            - "repository-volume:/usr/share/nginx/html"
-      volumes:
-        repository-volume:
-          size: 5Gi
-          persistent: true
-
-
-  ingestion:
-    rest-ingestion:
-      descriptor: rest-ingestion
-
-  sources:
-    test-source:
-      outgoing:
-        - ref: "inbox.pages"
-          produces:
-            - "it.page.published"
-            - "it.page.unpublished"
-
-  processing:
-    relay:
-      descriptor: processing-service
-      containers:
-        processing-function:
-          incoming:
-            incoming-pages:
-              ref: "inbox.pages"
-          outgoing:
-            outgoing-pages:
-              ref: "outbox.pages"
-
-  edge:
-    web-edge:
-      descriptor: edge-service
-      containers:
-        server:
-          incoming:
-            pages:
-              ref: "outbox.pages"
-
-    composite-web-edge:
-      descriptor: composite-edge-service
-      containers:
-        server:
-          incoming:
-            pages:
-              ref: "outbox.pages"
+default:
+  service:
+    repository: ghcr.io/streamx-dev/streamx
+    tag: latest-jvm
+  environment:
+    GLOBAL_MESH_VARIABLE: "globalValue"
+descriptors:
+  ghcr.io/streamx-dev/streamx/rest-ingestion:latest-jvm:
+    type: ingestion
+    containers:
+      rest:
+        image: "ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-j
+        ports:
+          - 80:8080
+        environment:
+          INGESTION_VARIABLE: "ingestionValue"
+          QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: "permit"
+  ghcr.io/streamx-dev/streamx/processing-service:latest-jvm:
+    type: processing
+    containers:
+      processing-function:
+        image: "sample-relay-processing-service"
+        incoming:
+          incoming-pages:
+            binding: http-structured-json
+        outgoing:
+          outgoing-pages:
+            binding: http-structured-json
+  ghcr.io/streamx-dev/streamx/edge-service:latest-jvm:
+    type: edge
+    containers:
+      server:
+        image: "sample-web-delivery-service"
+        ports:
+          - 8087:8080
+        incoming:
+          pages:
+            binding: http-structured-json
+  ghcr.io/streamx-dev/streamx/composite-edge-service:latest-jvm:
+    type: edge
+    containers:
+      server:
+        image: "sample-web-delivery-service"
+        ports:
+          - 8088:8080
+        environment:
+          REPOSITORY_RESOURCE_ROOT_DIRECTORY: "/srv/www"
+        volumes:
+          - "repository-volume:/srv/www"
+        incoming:
+          pages:
+            binding: http-structured-json
+      webserver:
+        image: "docker.io/library/nginx:1.26.0"
+        ports:
+          - 8089:80
+        volumes:
+          - "repository-volume:/usr/share/nginx/html"
+    volumes:
+      repository-volume:
+        size: 5Gi
+        persistent: true
+ingestion:
+  rest-ingestion:
+    descriptor: rest-ingestion
+sources:
+  test-source:
+    outgoing:
+      - ref: "inbox.pages"
+        produces:
+          - "it.page.published"
+          - "it.page.unpublished"
+processing:
+  relay:
+    descriptor: processing-service
+    containers:
+      processing-function:
+        incoming:
+          incoming-pages:
+            ref: "inbox.pages"
+        outgoing:
+          outgoing-pages:
+            ref: "outbox.pages"
+edge:
+  web-edge:
+    descriptor: edge-service
+    containers:
+      server:
+        incoming:
+          pages:
+            ref: "outbox.pages"
+  composite-web-edge:
+    descriptor: composite-edge-service
+    containers:
+      server:
+        incoming:
+          pages:
+            ref: "outbox.pages"
