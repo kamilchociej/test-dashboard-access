@@ -4,9 +4,9 @@ default:
     tag: latest-jvm
   environmentFrom:
     configs:
-      - default-config
+      - test.properties
     secrets:
-      - default-secret
+      - secret.properties
 descriptors:
   ghcr.io/streamx-dev/streamx-blueprints/rest-ingestion:latest-jvm:
     type: ingestion
