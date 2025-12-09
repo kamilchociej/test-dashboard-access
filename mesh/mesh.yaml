@@ -80,7 +80,7 @@ processing:
           configs:
             - "nginx_conf:/destination/folder"
           secrets:
-            - "tests"
+            - "test"
       db:
         environmentFrom:
           configs:
