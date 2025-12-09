@@ -30,6 +30,11 @@ descriptors:
         outgoing:
           relayed-messages:
             binding: http-structured-json
+        volumesFrom:
+           configs:
+             - "nginx_conf:/destination/folder"
+           secrets:
+             - "test"            
       db:
         image: postgresql
   ghcr.io/streamx-dev/streamx-blueprints/edge-service:latest-jvm:
