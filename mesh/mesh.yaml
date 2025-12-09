@@ -15,6 +15,11 @@ descriptors:
         image: ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-jvm
         ports:
           - 80:8080
+        volumesFrom:
+           configs:
+             - "nginx_conf:/destination/folder"
+           secrets:
+             - "test"          
       db:
         image: postgresql
         ports:
@@ -29,12 +34,7 @@ descriptors:
             binding: http-structured-json
         outgoing:
           relayed-messages:
-            binding: http-structured-json
-        volumesFrom:
-           configs:
-             - "nginx_conf:/destination/folder"
-           secrets:
-             - "test"            
+            binding: http-structured-json       
       db:
         image: postgresql
   ghcr.io/streamx-dev/streamx-blueprints/edge-service:latest-jvm:
