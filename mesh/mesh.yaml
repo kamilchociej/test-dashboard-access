@@ -19,7 +19,7 @@ descriptors:
            configs:
              - "nginx_conf:/destination/folder"
            secrets:
-             - "test"          
+             - "tests"          
       db:
         image: postgresql
         ports:
