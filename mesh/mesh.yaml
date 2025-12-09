@@ -4,12 +4,13 @@ default:
     tag: latest-jvm
   environment:
     GLOBAL_MESH_VARIABLE: "globalValue"
+
 descriptors:
   ghcr.io/streamx-dev/streamx/rest-ingestion:latest-jvm:
     type: ingestion
     containers:
       rest:
-        image: "ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-j
+        image: "ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-jvm"
         ports:
           - 80:8080
         environment:
@@ -60,9 +61,12 @@ descriptors:
       repository-volume:
         size: 5Gi
         persistent: true
+
+
 ingestion:
   rest-ingestion:
     descriptor: rest-ingestion
+
 sources:
   test-source:
     outgoing:
@@ -70,6 +74,7 @@ sources:
         produces:
           - "it.page.published"
           - "it.page.unpublished"
+
 processing:
   relay:
     descriptor: processing-service
@@ -81,6 +86,7 @@ processing:
         outgoing:
           outgoing-pages:
             ref: "outbox.pages"
+
 edge:
   web-edge:
     descriptor: edge-service
@@ -89,6 +95,7 @@ edge:
         incoming:
           pages:
             ref: "outbox.pages"
+
   composite-web-edge:
     descriptor: composite-edge-service
     containers:
