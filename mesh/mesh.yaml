@@ -1,142 +1,109 @@
 default:
   service:
-    repository: ghcr.io/streamx-dev/streamx-blueprints
+    repository: ghcr.io/streamx-dev/streamx
     tag: latest-jvm
+  environment:
+    GLOBAL_MESH_VARIABLE: "globalValue"
   environmentFrom:
     configs:
       - test.properties
     secrets:
       - secret.properties
+
 descriptors:
-  ghcr.io/streamx-dev/streamx-blueprints/rest-ingestion:latest-jvm:
+  ghcr.io/streamx-dev/streamx/rest-ingestion:latest-jvm:
     type: ingestion
     containers:
       rest:
-        image: ghcr.io/streamx-dev/streamx/rest-ingestion-service:latest-jvm
-        ports: 
+        servicePorts:
           - 80:8080
-      db:
-        image: postgresql
-        ports:
-          - 5432:5432
-  ghcr.io/streamx-dev/streamx-blueprints/processing-service:latest-jvm:
+        environment:
+          INGESTION_VARIABLE: "ingestionValue"
+          QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: "permit"
+  ghcr.io/streamx-dev/streamx/processing-service:latest-jvm:
     type: processing
     containers:
       processing-function:
-        image: relay-processing-service
+        image: "sample-relay-processing-service"
         incoming:
-          messages:
+          incoming-pages:
             binding: http-structured-json
         outgoing:
-          relayed-messages:
+          outgoing-pages:
             binding: http-structured-json
-      db:
-        image: postgresql
-  ghcr.io/streamx-dev/streamx-blueprints/edge-service:latest-jvm:
+  ghcr.io/streamx-dev/streamx/edge-service:latest-jvm:
     type: edge
     containers:
       server:
-        image: web-delivery-service
-        ports:
-          - 8080:8080
+        image: "sample-web-delivery-service"
+        servicePorts:
+          - 8087:8080
+        incoming:
+          pages:
+            binding: http-structured-json
+  ghcr.io/streamx-dev/streamx/composite-edge-service:latest-jvm:
+    type: edge
+    containers:
+      server:
+        image: "sample-web-delivery-service"
+        servicePorts:
+          - 8088:8080
+        environment:
+          REPOSITORY_RESOURCE_ROOT_DIRECTORY: "/srv/www"
+        volumes:
+          - "repository-volume:/srv/www"
         incoming:
           pages:
             binding: http-structured-json
       webserver:
         image: "docker.io/library/nginx:1.26.0"
-        ports:
-          - 80:80
+        servicePorts:
+          - 8089:80
+        volumes:
+          - "repository-volume:/usr/share/nginx/html"
+    volumes:
+      repository-volume:
+        size: 5Gi
+        persistent: true
+
+
 ingestion:
-  rest:
+  rest-ingestion:
     descriptor: rest-ingestion
-    containers:
-      db:
-        environmentFrom:
-          configs:
-            - ingestion-stateless-config
-          secrets:
-            - ingestion-stateless-secret
-  rest-state:
-    descriptor: rest-ingestion
-    containers:
-      db:
-        environmentFrom:
-          configs:
-            - ingestion-stateful-config
-          secrets:
-            - ingestion-stateful-secret
+
+sources:
+  test-source:
+    outgoing:
+      - ref: "inbox.pages"
+        produces:
+          - "it.page.published"
+          - "it.page.unpublished"
+
 processing:
   relay:
     descriptor: processing-service
     containers:
       processing-function:
         incoming:
-          messages:
-            ref: inbox.web-resources
+          incoming-pages:
+            ref: "inbox.pages"
         outgoing:
-          relayed-messages:
-            ref: outbox.web-resources
-        volumesFrom:
-          configs:
-            - "nginx_conf:/destination/folder"
-          secrets:
-            - "test"
-      db:
-        environmentFrom:
-          configs:
-            - processing-stateless-config
-          secrets:
-            - processing-stateless-secret
-  relay-state:
-    descriptor: processing-service
-    containers:
-      processing-function:
-        incoming:
-          messages:
-            ref: inbox.web-resources
-        outgoing:
-          relayed-messages:
-            ref: outbox.web-resources
-      db:
-        environmentFrom:
-          configs:
-            - processing-stateful-config
-          secrets:
-            - processing-stateful-secret
+          outgoing-pages:
+            ref: "outbox.pages"
+
 edge:
-  web:
+  web-edge:
     descriptor: edge-service
     containers:
       server:
         incoming:
           pages:
-            ref: outbox.pages
-      webserver:
-        environmentFrom:
-          configs:
-            - edge-stateless-config
-          secrets:
-            - edge-stateless-secret
-  web-state:
-    descriptor: edge-service
+            ref: "outbox.pages"
+
+  composite-web-edge:
+    descriptor: composite-edge-service
     containers:
       server:
         incoming:
           pages:
-            ref: outbox.pages
-      webserver:
-        environmentFrom:
-          configs:
-            - edge-stateful-config
-          secrets:
-            - edge-stateful-secret
-deploymentConfig:
-  ingestion:
-    rest-state:
-      stateful: true
-  processing:
-    relay-state:
-      stateful: true
-  edge:
-    web-state:
-      stateful: true
+            ref: "outbox.pages"
