@@ -1,109 +1,90 @@
-default:
-  service:
-    repository: ghcr.io/streamx-dev/streamx
-    tag: latest-jvm
-  environment:
-    GLOBAL_MESH_VARIABLE: "globalValue"
-  environmentFrom:
-    configs:
-      - test.properties
-    secrets:
-      - secret.properties
-
-descriptors:
-  ghcr.io/streamx-dev/streamx/rest-ingestion:latest-jvm:
-    type: ingestion
-    containers:
-      rest:
-        servicePorts:
-          - 80:8080
-        environment:
-          INGESTION_VARIABLE: "ingestionValue"
-          QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: "permit"
-  ghcr.io/streamx-dev/streamx/processing-service:latest-jvm:
-    type: processing
-    containers:
-      processing-function:
-        image: "sample-relay-processing-service"
-        incoming:
-          incoming-pages:
-            binding: http-structured-json
-        outgoing:
-          outgoing-pages:
-            binding: http-structured-json
-  ghcr.io/streamx-dev/streamx/edge-service:latest-jvm:
-    type: edge
-    containers:
-      server:
-        image: "sample-web-delivery-service"
-        servicePorts:
-          - 8087:8080
-        incoming:
-          pages:
-            binding: http-structured-json
-  ghcr.io/streamx-dev/streamx/composite-edge-service:latest-jvm:
-    type: edge
-    containers:
-      server:
-        image: "sample-web-delivery-service"
-        servicePorts:
-          - 8088:8080
-        environment:
-          REPOSITORY_RESOURCE_ROOT_DIRECTORY: "/srv/www"
-        volumes:
-          - "repository-volume:/srv/www"
-        incoming:
-          pages:
-            binding: http-structured-json
-      webserver:
-        image: "docker.io/library/nginx:1.26.0"
-        servicePorts:
-          - 8089:80
-        volumes:
-          - "repository-volume:/usr/share/nginx/html"
-    volumes:
-      repository-volume:
-        size: 5Gi
-        persistent: true
-
-
+---
+defaultRegistry: "ghcr.io/streamx-dev/streamx-blueprints"
+defaultImageTag: "1.0.6-jvm"
 ingestion:
   rest-ingestion:
-    descriptor: rest-ingestion
-
+    environment:
+      QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: "permit"
 sources:
-  test-source:
+  cli:
     outgoing:
-      - ref: "inbox.pages"
-        produces:
-          - "it.page.published"
-          - "it.page.unpublished"
-
+    - "pages"
+    - "fragments"
+    - "assets"
+    - "web-resources"
+    - "renderers"
+    - "rendering-contexts"
+    - "layouts"
+    - "compositions"
+  aem:
+    outgoing:
+    - "pages"
 processing:
-  relay:
-    descriptor: processing-service
-    containers:
-      processing-function:
-        incoming:
-          incoming-pages:
-            ref: "inbox.pages"
-        outgoing:
-          outgoing-pages:
-            ref: "outbox.pages"
-
-edge:
-  web-edge:
-    descriptor: edge-service
-    containers:
-      server:
-        incoming:
-          pages:
-            ref: "outbox.pages"
-
-  composite-web-edge:
-    descriptor: composite-edge-service
-    containers:
-      server:
-        incoming:
-          pages:
-            ref: "outbox.pages"
+  blueprint-relay-web-resources:
+    image: "relay-processing-service"
+    incoming:
+      messages:
+        topic: "inboxes/web-resources"
+    outgoing:
+      relayed-messages:
+        topic: "outboxes/web-resources"
+    environment:
+      MP_MESSAGING_INCOMING_MESSAGES_SCHEMA: "web-resource-schema"
+      MP_MESSAGING_OUTGOING_RELAYED-MESSAGES_SCHEMA: "web-resource-schema"
+  blueprint-relay-assets:
+    image: "relay-processing-service"
+    incoming:
+      messages:
+        topic: "inboxes/assets"
+    outgoing:
+      relayed-messages:
+        topic: "outboxes/assets"
+    environment:
+      MP_MESSAGING_INCOMING_MESSAGES_SCHEMA: "asset-schema"
+      MP_MESSAGING_OUTGOING_RELAYED-MESSAGES_SCHEMA: "asset-schema"
+  blueprint-relay-fragments:
+    image: "relay-processing-service"
+    incoming:
+      messages:
+        topic: "inboxes/fragments"
+    outgoing:
+      relayed-messages:
+        topic: "outboxes/fragments"
+    environment:
+      MP_MESSAGING_INCOMING_MESSAGES_SCHEMA: "fragment-schema"
+      MP_MESSAGING_OUTGOING_RELAYED-MESSAGES_SCHEMA: "fragment-schema"
+  blueprint-sitemap-generator:
+    image: "sitemap-generator-processing-service"
+    incoming:
+      incoming-pages:
+        topic: "inboxes/pages"
+    outgoing:
+      outgoing-sitemaps:
+        topic: "outboxes/web-resources"
+    environment:
+      STREAMX_BLUEPRINTS_SITEMAP_GENERATOR_PROCESSING_SERVICE_BASE_URL: "http://localhost:8081"
+      STREAMX_BLUEPRINTS_SITEMAP_GENERATOR_PROCESSING_SERVICE_OUTPUT_KEY: "sitemap.xml"
+  relay-processing-service:
+    image: "relay-processing-service"
+    incoming:
+      messages:
+        topic: "inboxes/pages"
+    outgoing:
+      relayed-messages:
+        topic: "outboxes/pages"
+    environment:
+      MP_MESSAGING_INCOMING_MESSAGES_SCHEMA: "page-schema"
+      MP_MESSAGING_OUTGOING_RELAYED-MESSAGES_SCHEMA: "page-schema"
+delivery:
+  blueprint-web:
+    image: "web-delivery-service"
+    incoming:
+      pages:
+        topic: "outboxes/pages"
+      fragments:
+        topic: "outboxes/fragments"
+      assets:
+        topic: "outboxes/assets"
+      web-resources:
+        topic: "outboxes/web-resources"
+    port: 8081
