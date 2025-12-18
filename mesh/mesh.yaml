@@ -5,8 +5,6 @@ default:
   environment:
     GLOBAL_MESH_VARIABLE: "globalValue"
   environmentFrom:
-    configs:
-      - test.properties
     secrets:
       - secret.properties
 descriptors:
