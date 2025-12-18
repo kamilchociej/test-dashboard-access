@@ -226,67 +226,6 @@ descriptors:
       opensearch-data:
         size: 15Gi
 
-gateways:
-  - name: main
-    httpRoutes:
-      - name: ingestion
-        hostnames:
-          - "rest-ingestion-default-127-0-0-1.nip.io"
-        rules:
-          - backendRefs:
-              - name: rest-ingestion
-                port: 8080
-      - name: search
-        parentRefs:
-          - sectionName: search-https
-        hostnames:
-          - "blueprint-search-default-127-0-0-1.nip.io"
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /
-            backendRefs:
-              - name: blueprint-search
-                port: 80
-      - name: search-redirect
-        parentRefs:
-          - sectionName: search-http
-        hostnames:
-          - "blueprint-search-default-127-0-0-1.nip.io"
-        rules:
-          - filters:
-              - type: RequestRedirect
-                requestRedirect:
-                  scheme: https
-                  statusCode: 301
-                  port: 443
-      - name: web
-        parentRefs:
-          - sectionName: web-https
-        hostnames:
-          - "blueprint-web-default-127-0-0-1.nip.io"
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /
-            backendRefs:
-              - name: blueprint-web
-                port: 8083
-      - name: web-redirect
-        parentRefs:
-          - sectionName: web-http
-        hostnames:
-          - "blueprint-web-default-127-0-0-1.nip.io"
-        rules:
-          - filters:
-              - type: RequestRedirect
-                requestRedirect:
-                  scheme: https
-                  statusCode: 301
-                  port: 443
-
 sources:
   cli:
     outgoing:
@@ -325,6 +264,9 @@ sources:
 
 ingestion:
   rest-ingestion:
+    containers:
+      service:
+        environment:
 
 processing:
   # Relay service for pages is not needed because the image optimization service performs relaying pages
