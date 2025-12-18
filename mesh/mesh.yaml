@@ -40,7 +40,7 @@ descriptors:
           - "repository-volume:/srv/www"
       webserver:
         image: "docker.io/library/nginx:1.26.0"
-        ports:
+        servicePorts:
           - "80:80"
         volumes:
           - "repository-volume:/usr/share/nginx/html"
