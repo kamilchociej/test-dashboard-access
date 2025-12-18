@@ -17,6 +17,7 @@ descriptors:
         outgoing:
           relayed-events: {}
 
+
   optimized-images-generator:
     type: "processing"
     containers:
