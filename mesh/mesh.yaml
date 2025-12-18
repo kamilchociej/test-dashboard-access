@@ -1,3 +1,14 @@
+default:
+  service:
+    repository: ghcr.io/streamx-dev/streamx
+    tag: latest-jvm
+  environment:
+    GLOBAL_MESH_VARIABLE: "globalValue"
+  environmentFrom:
+    configs:
+      - test.properties
+    secrets:
+      - secret.properties
 descriptors:
   relay:
     type: "processing"
