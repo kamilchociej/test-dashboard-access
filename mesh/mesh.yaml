@@ -263,7 +263,7 @@ sources:
           - "com.streamx.blueprints.rendering-context.unpublished.v1"
 
 ingestion:
-  rest-ingestion: 
+  rest-ingestion: {}
 processing:
   # Relay service for pages is not needed because the image optimization service performs relaying pages
   blueprint-relay-web-resources:
