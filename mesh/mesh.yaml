@@ -1,9 +1,3 @@
-default:
-  environment:
-    GLOBAL_MESH_VARIABLE: "globalValue"
-  environmentFrom:
-    secrets:
-      - secret.properties
 descriptors:
   relay:
     type: "processing"
