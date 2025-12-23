@@ -222,24 +222,6 @@ descriptors:
         size: 10Gi
       opensearch-data:
         size: 15Gi
-
-gateways:
-  - httpRoutes:
-      - name: ingestion
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /ingest
-            backendRefs:
-              - name: rest-ingestion
-                port: 8080
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: /
   sources:
     cli:
       outgoing:
