@@ -1,51 +1,3 @@
-gateways:
-  - httpRoutes:
-      - name: ingestion
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /ingest
-            backendRefs:
-              - name: ingestion/rest-ingestion
-                port: 8080
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: /
-      - name: search
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /search
-            backendRefs:
-              - name: edge/blueprint-search
-                port: 80
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: /
-        - name: web
-          rules:
-            - matches:
-                - path:
-                    type: PathPrefix
-                    value: /web
-              backendRefs:
-                - name: edge/blueprint-web
-                  port: 8083
-              filters:
-                - type: URLRewrite
-                  urlRewrite:
-                    path:
-                      type: ReplacePrefixMatch
-                      replacePrefixMatch: /
-
 descriptors:
   relay:
     type: "processing"
@@ -185,7 +137,7 @@ descriptors:
           STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_OUTPUT_DATA_TYPE: "collected-product"
           STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_PROPERTIES_OUTPUTKEYPREFIX: "collected_products_cheapest-by-category_"
           STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_PROPERTIES_GROUPBY: "category"
-          STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_PROPERTIES_MAX: "9"
+          STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_PROPERTIES_MAX: "8"
           STREAMX_BLUEPRINTS_DATA_COLLECTOR_CONFIGURATIONS_CHEAPEST-PRODUCTS-BY-CATEGORY_PROPERTIES_SORTBY: "id"
   sitemap-generator:
     type: processing
@@ -268,6 +220,54 @@ descriptors:
       opensearch-data:
         size: 15Gi
 
+gateways:
+  - httpRoutes:
+      - name: ingestion
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /ingest
+            backendRefs:
+              - name: ingestion/rest-ingestion
+                port: 8080
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+      - name: search
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /search
+            backendRefs:
+              - name: edge/blueprint-search
+                port: 80
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+      - name: web
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /web
+            backendRefs:
+              - name: edge/blueprint-web
+                port: 8083
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+
 sources:
   cli:
     outgoing:
@@ -306,6 +306,7 @@ sources:
 
 ingestion:
   rest-ingestion: {}
+
 processing:
   # Relay service for pages is not needed because the image optimization service performs relaying pages
   blueprint-relay-web-resources:
@@ -499,62 +500,3 @@ edge:
         environment:
           QUARKUS_ELASTICSEARCH_HOSTS: "blueprint-search.opensearch:9200"
           STREAMX_BLUEPRINTS_OPENSEARCH-SINK_MIGRATION-SCRIPT-LOCATIONS: "classpath:opensearch/service-init"
-
-deploymentConfig:
-  defaults:
-    global:
-      podDisruptionBudget:
-        enabled: true
-        minAvailable: 1
-    edge:
-      replicas: 2
-      podDisruptionBudget:
-        enabled: true
-        maxUnavailable: 2
-    processing:
-      podDisruptionBudget:
-        enabled: true
-        maxUnavailable: 1
-  edge:
-    blueprint-search:
-      stateful: true
-      replicas: 1
-      probes: {}
-      containers:
-        opensearch:
-          sidecar: true
-          probes:
-            readiness:
-              httpGet:
-                path: /
-                port: 9200
-                scheme: HTTP
-              initialDelaySeconds: 5
-              periodSeconds: 10
-              timeoutSeconds: 5
-              successThreshold: 1
-              failureThreshold: 3
-            liveness:
-              httpGet:
-                path: /
-                port: 9200
-                scheme: HTTP
-              initialDelaySeconds: 5
-              periodSeconds: 15
-              timeoutSeconds: 5
-              failureThreshold: 3
-            startup:
-              httpGet:
-                path: /
-                port: 9200
-                scheme: HTTP
-              initialDelaySeconds: 5
-              periodSeconds: 10
-              timeoutSeconds: 5
-              successThreshold: 1
-              failureThreshold: 3
-    blueprint-web:
-      stateful: true
-      podDisruptionBudget:
-        enabled: true
-        maxUnavailable: 1
