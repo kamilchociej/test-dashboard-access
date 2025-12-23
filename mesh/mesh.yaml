@@ -47,9 +47,6 @@ descriptors:
         outgoing:
           aggregated-data: { }
           aggregated-multivalued-data: { }
-        environmentFrom:
-          secrets:
-            - secret.properties
         environment:
           STREAMX_BLUEPRINTS_JSON_AGGREGATOR_CONFIGURATIONS_0__MASTER_NAMESPACE: "pim"
           STREAMX_BLUEPRINTS_JSON_AGGREGATOR_CONFIGURATIONS_0__OPTIONAL_NAMESPACES: "price,reviews"
@@ -270,6 +267,9 @@ descriptors:
           incoming:
             events:
               ref: inbox.web-resources
+          environmentFrom:
+            secrets:
+              - secret.properties     
           outgoing:
             relayed-events:
               ref: outbox.web-resources
