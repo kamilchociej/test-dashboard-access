@@ -237,37 +237,6 @@ gateways:
                   path:
                     type: ReplacePrefixMatch
                     replacePrefixMatch: /
-          - name: search
-            rules:
-              - matches:
-                  - path:
-                      type: PathPrefix
-                      value: /search
-                backendRefs:
-                  - name: blueprint-search
-                    port: 80
-                filters:
-                  - type: URLRewrite
-                    urlRewrite:
-                      path:
-                        type: ReplacePrefixMatch
-                        replacePrefixMatch: /
-          - name: web
-            rules:
-              - matches:
-                  - path:
-                      type: PathPrefix
-                      value: /web
-                backendRefs:
-                  - name: blueprint-web
-                    port: 8083
-                filters:
-                  - type: URLRewrite
-                    urlRewrite:
-                      path:
-                        type: ReplacePrefixMatch
-                        replacePrefixMatch: /
-
   sources:
     cli:
       outgoing:
