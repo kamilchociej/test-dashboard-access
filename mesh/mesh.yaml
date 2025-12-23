@@ -16,9 +16,6 @@ descriptors:
           incoming-assets: { }
         outgoing:
           optimized-assets: { }
-        environmentFrom:
-          secrets:
-            - secret.properties
         environment:
           STREAMX_BLUEPRINTS_OPTIMIZED_IMAGES_GENERATOR_PROCESSED_IMAGE_PATH_PATTERN: ".*(png|gif|jpg|jpeg)$"
           STREAMX_BLUEPRINTS_OPTIMIZED_IMAGES_GENERATOR_OPTIMIZED_IMAGE_FILE_NAME-SUFFIX: "-optimized"
@@ -50,6 +47,9 @@ descriptors:
         outgoing:
           aggregated-data: { }
           aggregated-multivalued-data: { }
+        environmentFrom:
+          secrets:
+            - secret.properties
         environment:
           STREAMX_BLUEPRINTS_JSON_AGGREGATOR_CONFIGURATIONS_0__MASTER_NAMESPACE: "pim"
           STREAMX_BLUEPRINTS_JSON_AGGREGATOR_CONFIGURATIONS_0__OPTIONAL_NAMESPACES: "price,reviews"
