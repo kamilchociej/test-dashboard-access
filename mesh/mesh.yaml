@@ -1,3 +1,51 @@
+  gateways:
+    - httpRoutes:
+        - name: ingestion
+          rules:
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /ingest
+              backendRefs:
+                - name: ingestion/rest-ingestion
+                  port: 8080
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: /
+        - name: search
+          rules:
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /search
+              backendRefs:
+                - name: edge/blueprint-search
+                  port: 80
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: /
+        - name: web
+          rules:
+            - matches:
+                - path:
+                    type: PathPrefix
+                    value: /web
+              backendRefs:
+                - name: edge/blueprint-web
+                  port: 8083
+              filters:
+                - type: URLRewrite
+                  urlRewrite:
+                    path:
+                      type: ReplacePrefixMatch
+                      replacePrefixMatch: /
+
 descriptors:
   relay:
     type: "processing"
