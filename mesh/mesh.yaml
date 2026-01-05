@@ -38,7 +38,7 @@ gateways:
                   value: /web
             backendRefs:
               - name: edge/blueprint-web-server-sink
-                port: 80
+                port: 8082
             filters:
               - type: URLRewrite
                 urlRewrite:
