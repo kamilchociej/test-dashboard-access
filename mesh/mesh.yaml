@@ -272,11 +272,7 @@ sources:
           - "com.streamx.blueprints.rendering-context.unpublished.v1"
 
 ingestion:
-  rest-ingestion:
-    containers:
-      service:
-        environment:
-          QUARKUS_HTTP_AUTH_PERMISSION_BEARER_POLICY: permit
+  rest-ingestion: {}
 
 processing:
   web-resources-relay:
