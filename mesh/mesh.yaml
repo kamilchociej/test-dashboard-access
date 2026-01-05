@@ -232,7 +232,7 @@ descriptors:
         healthCheck: "/_cluster/health"
 
 sources:
-  cli:
+  cli2:
     outgoing:
       - ref: "inbox.pages"
         produces:
